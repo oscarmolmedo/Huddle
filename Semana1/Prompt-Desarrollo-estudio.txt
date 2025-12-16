@@ -1,0 +1,116 @@
+## 🧭 Prompt para el Challenge: *Escape en Coordenadas*
+
+> Actúa como mi mentor de programación en Python.
+> Mi objetivo es construir una herramienta que encuentre el camino más corto en un mapa representado como una matriz 2D con obstáculos.
+> Debes guiarme paso a paso sin darme la solución completa, proponiendo:
+>
+> * Explicaciones breves de los conceptos necesarios.
+> * Pseudocódigo comentado que pueda usar como guía.
+> * Pequeños ejercicios para practicar lo que me enseñas (uno fácil y otro un poco más difícil).
+> * Consejos de buenas prácticas y posibles mejoras.
+
+Quiero organizar el aprendizaje en **3 bloques de 1 día cada uno (4h por día):**
+
+---
+
+### 📅 **Día 1: Fundamentos & Mapa**
+
+🎯 Objetivo: crear un mapa básico y representarlo en consola.
+
+**Conceptos a Aprender:**
+
+* Matrices en Python (listas de listas).
+* Coordenadas (x, y).
+* Cómo recorrer y mostrar el mapa en consola.
+
+**Pseudocódigo guía:**
+
+```text
+1. Crear una función generar_mapa(ancho, alto):
+    - Rellenar con ceros (0 = camino libre)
+
+2. Crear una función imprimir_mapa(mapa):
+    - Recorrer cada fila y mostrar símbolos:
+        0 -> .
+        1 -> X
+        2 -> ~
+        3 -> #
+
+3. Permitir al usuario ingresar coordenadas de inicio y destino.
+    - Validar que no estén en un obstáculo ni fuera del rango.
+```
+
+**Ejercicio fácil:**
+Crea una matriz 5x5 y muéstrala en consola. Reemplaza una celda con un obstáculo (1) y vuelve a imprimir.
+
+**Ejercicio intermedio:**
+Permite al usuario ingresar varias coordenadas para colocar obstáculos en el mapa de forma dinámica.
+
+---
+
+### 📅 **Día 2: Algoritmos de Búsqueda**
+
+🎯 Objetivo: implementar un algoritmo que encuentre un camino válido.
+
+**Conceptos a Aprender:**
+
+* Búsqueda en anchura (BFS).
+* Representar nodos y vecinos en una matriz.
+* Uso de colas (`collections.deque`).
+
+**Pseudocódigo guía (BFS):**
+
+```text
+1. Definir una función bfs(mapa, inicio, fin):
+    - Crear una cola e insertar el nodo inicial.
+    - Crear un diccionario "padres" para reconstruir el camino.
+    - Mientras la cola no esté vacía:
+        - Sacar el primer nodo
+        - Si es el destino -> detener y reconstruir el camino
+        - Recorrer sus vecinos válidos (arriba, abajo, izq, der)
+            - Si no es obstáculo y no fue visitado -> agregar a cola
+    - Retornar el camino encontrado o indicar que no hay ruta
+```
+
+**Ejercicio fácil:**
+Implementa BFS en una matriz 3x3 sin obstáculos para encontrar el camino entre (0,0) y (2,2).
+
+**Ejercicio intermedio:**
+Agrega obstáculos aleatorios y asegúrate de que BFS solo devuelva caminos válidos. Si no hay camino, muestra un mensaje.
+
+---
+
+### 📅 **Día 3: Optimización & Visualización**
+
+🎯 Objetivo: mejorar el programa y visualizar el camino encontrado.
+
+**Conceptos a Aprender:**
+
+* Reconstruir la ruta usando el diccionario de padres.
+* Marcar la ruta encontrada en el mapa (`*`).
+* Manejar parámetros dinámicos (tamaño del mapa, agregar obstáculos en runtime).
+
+**Pseudocódigo guía:**
+
+```text
+1. Después de BFS, usar el diccionario de padres:
+    - Empezar en el nodo final y retroceder hasta el inicial.
+    - Guardar cada paso en una lista.
+    - Marcar cada coordenada en el mapa como parte de la ruta (*).
+
+2. Permitir recalcular rutas si el usuario agrega un nuevo obstáculo.
+```
+
+**Ejercicio fácil:**
+Dibuja la ruta más corta en un mapa simple y vuelve a imprimirlo.
+
+**Ejercicio intermedio:**
+Implementa "agua" (2) como obstáculo con costo diferente. No bloquea, pero obliga a dar un rodeo si es posible.
+
+---
+
+### 💡 Consejos de Buenas Prácticas
+
+* Usa funciones pequeñas y descriptivas: `generar_mapa()`, `agregar_obstaculo()`, `buscar_ruta()`.
+* Maneja los errores: coordenadas fuera de rango, mapas vacíos, etc.
+* Comenta tu código para explicar la lógica.

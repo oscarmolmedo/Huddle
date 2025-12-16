@@ -1,0 +1,22 @@
+funcion bfs(mapa, inicio, destino):
+    crear cola vacía y agregar inicio
+    crear conjunto visitados y agregar inicio
+    crear diccionario padres = {inicio: None}
+
+    mientras la cola no esté vacía:
+        nodo_actual = sacar primer elemento de la cola
+
+        si nodo_actual == destino:
+            salir del bucle (¡lo encontramos!)
+
+        para cada vecino en vecinos_validos(nodo_actual):
+            si vecino no está en visitados:
+                agregar vecino a la cola
+                agregar vecino a visitados
+                padres[vecino] = nodo_actual
+
+    si destino no está en padres:
+        devolver None (no hay camino)
+    si no:
+        reconstruir camino usando padres
+        devolver camino
