@@ -1,0 +1,10 @@
+:root { --primary: #2563eb; --danger: #dc2626; --bg: #f8fafc; }
+body { font-family: 'Segoe UI', sans-serif; background: var(--bg); padding: 2rem; }
+.container { max-width: 800px; margin: auto; }
+.card { background: white; padding: 1.5rem; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-bottom: 1rem; }
+.vote-count { font-size: 1.2rem; font-weight: bold; color: var(--primary); }
+button { cursor: pointer; padding: 0.5rem 1rem; border-radius: 4px; border: none; }
+.btn-vote { background: var(--primary); color: white; }
+.btn-delete { background: transparent; color: var(--danger); font-size: 0.8rem; }
+form { display: grid; gap: 1rem; margin-bottom: 2rem; }
+input, textarea { padding: 0.5rem; border: 1px solid #ccc; border-radius: 4px; }

@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= pageTitle %></title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <header>
+        <h1><%= pageTitle %></h1>
+    </header>
+        <section>
+        <h2>Nuevo Tema de Aprendizaje</h2>
+        <form action="/topics" method="POST">
+            <input type="text" name="title" placeholder="Ej: React Avanzado" required>
+            <button type="submit">Crear Tema</button>
+        </form>
+        </section>
+
+        <hr>
+
+        <main id="topics-container">
+            <% topics.forEach(topic => { %>
+                <div class="topic-card" data-id="<%= topic.id %>">
+                    <h2><%= topic.title %> (Votos: <span class="t-votes"><%= topic.votes %></span>)</h2>
+                    <button class="edit-topic-btn" data-id="<%= topic.id %>" data-title="<%= topic.title %>">📝 Editar</button>
+                    <button class="delete-topic-btn" data-id="<%= topic.id %>" style="color: red;">🗑️ Borrar</button>
+                    <button class="vote-topic-btn" data-id="<%= topic.id %>">Votar Tema</button>
+
+                <ul>
+                    <% topic.links.forEach(link => { %>
+                        <li>
+                            <a href="<%= link.url %>"><%= link.description %></a> 
+                            <span>- Votos: <%= link.votes %></span>
+                            <button class="vote-enlace-btn" 
+                                    data-topic="<%= topic.id %>"
+                                    data-link="<%= link.id %>">
+                                Votar Enlace
+                            </button>
+                        </li>
+                    <% }) %>
+                </ul>
+                <form action="/topics/<%= topic.id %>/links" method="POST">
+                    <input type="text" name="url" placeholder="URL" required>
+                    <input type="text" name="description" placeholder="Descripción" required>
+                    <button type="submit">Añadir Enlace</button>
+                </form>
+                
+            </div>
+            <% }) %>
+        </main>
+    <script src="/js/main.js"></script>
+</body>
+</html>
