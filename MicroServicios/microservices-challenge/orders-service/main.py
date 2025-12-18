@@ -44,21 +44,21 @@ async def create_order(order_data: schemas.OrderBase, db: Session = Depends(get_
 
     # 1. EL CIRCUITO ESTÁ ABIERTO (OPEN)
     except CircuitBreakerError:
-        # A partir del 6to intento, esto se dispara INSTANTÁNEAMENTE sin hacer la llamada.
-        logger.error(f"✅ Circuit Breaker ABIERTO (OPEN). Evitando llamada al servicio de Inventario.")
-        raise HTTPException(status_code=503, detail="Servicio de Inventario no disponible (Circuit Breaker Abierto)")
+        # A partir del tercer intento, esto se dispara INSTANTÁNEAMENTE sin hacer la llamada.
+        logger.error(f"✅ Circuit Breaker ABIERTO (OPEN). Evitando llamada al servicio de Productos.")
+        raise HTTPException(status_code=503, detail="Servicio de Productos no disponible (Circuit Breaker Abierto)")
     
     # 2. FALLO DE CONEXIÓN MIENTRAS SE CUENTA (CLOSED o HALF-OPEN)
     except httpx.RequestError as e:
         # Estos son los fallos 1, 2, 3, 4, 5. El CB aún está en estado CLOSED o HALF-OPEN.
         # El CB registra el fallo y lanza la excepción original (RequestError) al endpoint.
         logger.warning(f"⚠️ Fallo de conexión (CB contando): {type(e).__name__}: {e}")
-        raise HTTPException(status_code=503, detail="Servicio de Inventario no disponible (Fallo de conexión)")
+        raise HTTPException(status_code=503, detail="Servicio de Productos no disponible (Fallo de conexión)")
         
     # 3. ERROR LÓGICO DE SERVIDOR (5xx) EXCLUIDO
     except httpx.HTTPStatusError as e:
-        # Esto ocurre si el Inventario devuelve 5xx. El CB lo ignora (exclude) y se propaga al endpoint.
-        raise HTTPException(status_code=503, detail="Servicio de Inventario fallando internamente (Error 5xx)")
+        # Esto ocurre si el Productos devuelve 5xx. El CB lo ignora (exclude) y se propaga al endpoint.
+        raise HTTPException(status_code=503, detail="Servicio de Productos fallando internamente (Error 5xx)")
 
     # --- 3. CREAR PEDIDO LOCALMENTE (DB orders.db) ---
     

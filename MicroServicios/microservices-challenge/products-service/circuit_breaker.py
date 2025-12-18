@@ -18,9 +18,11 @@ service_circuit_breaker = CircuitBreaker(
 #Funcion asincrona para llamar a Inventario
 @service_circuit_breaker
 async def call_external_service (url: str, nombre_servicio: str, service_header ):
+    #with se usa para inicializar y liberar el recurso evitando bloqueos y resultados inesperados
     async with httpx.AsyncClient(timeout=30) as client:
         try:
             headers = {'Authorization': f'Bearer {service_header}'}
+            #await desencadena un comportamiento sincrono dentro de la funcion asincrona
             response = await client.get(url, headers=headers)
 
             if response.status_code == 200:

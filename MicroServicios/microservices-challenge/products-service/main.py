@@ -44,7 +44,7 @@ async def read_product(product_id: int, is_authorized: bool = Depends(verify_int
         
     # 1. EL CIRCUITO ESTÁ ABIERTO (OPEN)
     except CircuitBreakerError:
-        # A partir del 6to intento, esto se dispara INSTANTÁNEAMENTE sin hacer la llamada.
+        # A partir del tercer, esto se dispara INSTANTÁNEAMENTE sin hacer la llamada.
         logger.error(f"✅ Circuit Breaker ABIERTO (OPEN). Evitando llamada al servicio de Inventario.")
         raise HTTPException(status_code=503, detail="Servicio de Inventario no disponible (Circuit Breaker Abierto)")
     
