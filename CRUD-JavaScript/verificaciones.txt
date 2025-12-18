@@ -5,7 +5,7 @@ Define las rutas básicas.
 Implementa rutas y controladores para crear, leer, actualizar y eliminar temas.
     Realizado
 Implementa funcionalidades CRUD para enlaces dentro de los temas.
-    Pendiente
+    Realizado
 Añade funcionalidad para que los usuarios puedan votar por temas y enlaces.
     Realizado
 Actualiza el conteo de votos y reordena el contenido.
@@ -15,5 +15,6 @@ Configura y utiliza el motor de plantillas (EJS o Handlebars) para renderizar da
 Implementa interacciones del lado del cliente usando JavaScript puro.
     Realizado
 Añade lógica para manejar clics en botones de votación y actualizaciones en la interfaz Asegurate que todo funcione correctamente
+    Realizado
 Optimiza el programa
     Realizado

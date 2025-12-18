@@ -36,11 +36,25 @@ module.exports = {
     return newTopic;
   },
 
-  // MODIFICAR TEMA
-  updateTopic: (id, newTitle) => {
+  // MODIFICAR TEMA Y LINKS
+  updateTopic: (id, newTitle, updatedLinks) => {
     const topic = topics.find(t => t.id == id);
     if (topic) {
-      topic.title = newTitle;
+      if (newTitle) topic.title = newTitle;
+      
+      // Si enviamos links para actualizar
+      if (updatedLinks && Array.isArray(updatedLinks)) {
+        topic.links = updatedLinks.map(link => {
+          // Buscamos si el link ya existía para mantener sus votos
+          const existingLink = topic.links.find(l => l.id == link.id);
+          return {
+            id: link.id || Date.now(),
+            url: link.url,
+            description: link.description,
+            votes: existingLink ? existingLink.votes : 0
+          };
+        });
+      }
     }
     return topic;
   },

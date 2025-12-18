@@ -1,9 +1,7 @@
-
 //imports
 const express = require('express');
 const router = express.Router();
 const learningModel = require('../models/learningModel');
-
 
 // LEER: Obtener todos los temas
 router.get('/', (req, res) => {
@@ -20,8 +18,8 @@ router.post('/topics', (req, res) => {
 
 // MODIFICAR TEMA (PATCH desde fetch)
 router.patch('/topics/:id', (req, res) => {
-  const { title } = req.body;
-  const updated = learningModel.updateTopic(req.params.id, title);
+  const { title, links } = req.body; // Ahora recibimos links también
+  const updated = learningModel.updateTopic(req.params.id, title, links);
   res.json({ success: true, topic: updated });
 });
 

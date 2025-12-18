@@ -24,9 +24,18 @@
             <% topics.forEach(topic => { %>
                 <div class="topic-card" data-id="<%= topic.id %>">
                     <h2><%= topic.title %> (Votos: <span class="t-votes"><%= topic.votes %></span>)</h2>
-                    <button class="edit-topic-btn" data-id="<%= topic.id %>" data-title="<%= topic.title %>">📝 Editar</button>
-                    <button class="delete-topic-btn" data-id="<%= topic.id %>" style="color: red;">🗑️ Borrar</button>
-                    <button class="vote-topic-btn" data-id="<%= topic.id %>">Votar Tema</button>
+                    <button class="edit-topic-btn" 
+                    data-id="<%= topic.id %>" 
+                    data-title="<%= topic.title %>"
+                    data-links='<%= JSON.stringify(topic.links) %>'> 
+                    📝 Editar
+                    </button>
+                    <button class="delete-topic-btn" 
+                    data-id="<%= topic.id %>" 
+                    style="color: red;">
+                    🗑️ Borrar
+                    </button>
+                <button class="vote-topic-btn" data-id="<%= topic.id %>">Votar Tema</button>
 
                 <ul>
                     <% topic.links.forEach(link => { %>
