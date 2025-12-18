@@ -42,6 +42,25 @@ async def create_order(order_data: schemas.OrderBase, db: Session = Depends(get_
         product_info = await call_external_service(PRODUCTS_SERVICE_URL, 'PRODUCTS-SERVICE', token)
         logger.info(f"Producto  verificado{product_info}")
 
+        if product_info:
+            # 3.1. Crear el objeto de la DB
+            db_order = models.Orders(
+                product_id=product_id, 
+                cantidad=quantity
+            )
+
+            # 3.2. Guardar en la DB
+            db.add(db_order)
+            db.commit()
+            db.refresh(db_order)
+            
+            logger.info(f"Pedido {db_order.id} creado con éxito.")
+
+            return db_order
+        else:
+            raise HTTPException(status_code=404, detail='Id Producto no existe en Products-Service')
+
+
     # 1. EL CIRCUITO ESTÁ ABIERTO (OPEN)
     except CircuitBreakerError:
         # A partir del tercer intento, esto se dispara INSTANTÁNEAMENTE sin hacer la llamada.
@@ -62,17 +81,3 @@ async def create_order(order_data: schemas.OrderBase, db: Session = Depends(get_
 
     # --- 3. CREAR PEDIDO LOCALMENTE (DB orders.db) ---
     
-    # 3.1. Crear el objeto de la DB
-    db_order = models.Orders(
-        product_id=product_id, 
-        cantidad=quantity
-    )
-
-    # 3.2. Guardar en la DB
-    db.add(db_order)
-    db.commit()
-    db.refresh(db_order)
-    
-    logger.info(f"Pedido {db_order.id} creado con éxito.")
-
-    return db_order

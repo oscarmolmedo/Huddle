@@ -39,7 +39,7 @@ async def call_external_service (url: str, nombre_servicio: str, service_header 
                 )
             elif response.status_code == 404:
                 # Éxito lógico (no cuenta como fallo para el CB)
-                return 0
+                return False
             else:
                 # Lanza httpx.HTTPStatusError. Como NO es de conexión y está en 'exclude',
                 # el CB lo considera un éxito, pero el endpoint debe manejar este error.
