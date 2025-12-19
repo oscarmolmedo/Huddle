@@ -18,16 +18,41 @@ let topics = [
 ];
 
 module.exports = {
-  getAll: () => {
+  getAllOrdered: () => {                                                //Retorna los temas ordenados por votos
     topics.sort((a, b) => b.votes - a.votes);
     topics.forEach(t => t.links.sort((a, b) => b.votes - a.votes));
     return topics;
   },
+  
+  // ELIMINAR TEMA
+  deleteTopic: (id) => {                                                  //Elimina un tema por su id
+    const index = topics.find(t => t.id == id);
+    //que es index y cual sería su valor
+    //index es la posición del elemento en el array topics 
+    // que coincide con el id proporcionado. Si no se encuentra, index será -1.
+    if (index !== -1) {
+      return topics.splice(index, 1); // Elimina el elemento del array
+    }
+    return null;
+  },
+  
+  // VOTAR Enlace 
+  voteEnlace: (topicId, linkId) => {                                    //Pasamos id y enlace por que un tema puede tener varios enlaces
+  const topic = topics.find(t => t.id == topicId);
+  if (topic) {
+    const link = topic.links.find(l => l.id == linkId)
+    if (link) {
+      link.votes++;
+      return link;
+    }
+  }
+  return null;
+  },
 
   // CREAR TEMA
-  addTopic: (title) => {
+  addTopic: (title) => {                                              //Agrega un nuevo tema y retorna el tema creado(diccionario)
     const newTopic = {
-      id: Date.now(), // Generamos un ID único basado en el tiempo
+      id: Date.now(),                                                 // Generamos un ID único basado en el tiempo. Ejemplo de id: 1625247600000
       title: title,
       votes: 0,
       links: []
@@ -37,13 +62,13 @@ module.exports = {
   },
 
   // MODIFICAR TEMA Y LINKS
-  updateTopic: (id, newTitle, updatedLinks) => {
+  updateTopic: (id, newTitle, updatedLinks) => {                          //Actualiza el titulo y los links de un tema
     const topic = topics.find(t => t.id == id);
     if (topic) {
       if (newTitle) topic.title = newTitle;
       
       // Si enviamos links para actualizar
-      if (updatedLinks && Array.isArray(updatedLinks)) {
+      if (updatedLinks && Array.isArray(updatedLinks)) {                  // Verificamos que updatedLinks sea un array
         topic.links = updatedLinks.map(link => {
           // Buscamos si el link ya existía para mantener sus votos
           const existingLink = topic.links.find(l => l.id == link.id);
@@ -57,15 +82,6 @@ module.exports = {
       }
     }
     return topic;
-  },
-
-  // ELIMINAR TEMA
-  deleteTopic: (id) => {
-    const index = topics.find(t => t.id == id);
-    if (index !== -1) {
-      return topics.splice(index, 1); // Elimina el elemento del array
-    }
-    return null;
   },
 
   // CREAR ENLACE DENTRO DE TEMA
@@ -83,16 +99,4 @@ module.exports = {
     return topic;
   },
 
-    // VOTAR Enlace 
-  voteEnlace: (topicId, linkId) => {
-    const topic = topics.find(t => t.id == topicId);
-    if (topic) {
-      const link = topic.links.find(l => l.id == linkId)
-      if (link) {
-        link.votes++;
-        return link;
-      }
-    }
-   return null;
-  },
 };

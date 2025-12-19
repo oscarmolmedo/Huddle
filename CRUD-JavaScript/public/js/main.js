@@ -1,23 +1,43 @@
+// Manejo de eventos para botones de eliminar, editar y votar
 document.addEventListener('click', async (e) => {
     
     // ELIMINAR TEMA
     if (e.target.classList.contains('delete-topic-btn')) {
-        if (confirm('¿Estás seguro de que quieres borrar este tema?')) {
-            const id = e.target.dataset.id;
-            const response = await fetch(`/topics/${id}`, { method: 'DELETE' });
+        //Se obtiene el id del tema a eliminar desde el atributo data-id del botón
+        const id = e.target.dataset.id;
+
+        if (confirm(`¿Estás seguro de que quieres borrar el tema con ID: ${id}`)) {
+            const response = await fetch(`/topics/${id}`, { method: 'DELETE' });        // Llamada a la ruta DELETE del servidor
             console.log("Status del servidor:", response.status);
             if (response.ok) window.location.reload();
         }
     }
 
+    //BOTON VOTAR LINK
+    if (e.target.classList.contains('vote-enlace-btn')) {
+      //   const topicId = e.target.dataset.topic; // Obtiene el ID del tema
+      //   const linkId = e.target.dataset.link;   // Obtiene el ID del enlace
+  
+      //Desempaquetamos y creamos variables con el mismo nombre
+      const {topic, link} = e.target.dataset
+        
+        // Llamada a la nueva ruta
+        const response = await fetch(`/topics/${topic}/links/${link}/vote`, { method: 'PATCH'});
+        
+        const data = await response.json();
+  
+        if (data.success) {
+            window.location.reload(); 
+        }
+    }
     // EDITAR TEMA Y LINKS
     if (e.target.classList.contains('edit-topic-btn')) {
-        const id = e.target.dataset.id;
-        const oldTitle = e.target.dataset.title;
+        
+        const {id, title} = e.target.dataset
         const currentLinks = JSON.parse(e.target.dataset.links); // Recuperamos los links
 
         // 1. Preguntar por el nuevo título
-        const newTitle = prompt("Nuevo nombre del tema:", oldTitle);
+        const newTitle = prompt("Nuevo nombre del tema:", title);
         if (newTitle === null) return; // Cancelado
 
         // 2. Iterar por los links actuales para editarlos
@@ -56,22 +76,6 @@ document.addEventListener('click', async (e) => {
       window.location.reload();
 
     }
-  }
-  //BOTON VOTAR LINK
-  if (e.target.classList.contains('vote-enlace-btn')) {
-      const topicId = e.target.dataset.topic; // Obtiene el ID del tema
-      const linkId = e.target.dataset.link;   // Obtiene el ID del enlace
-      
-      // Llamada a la nueva ruta
-      const response = await fetch(`/topics/${topicId}/links/${linkId}/vote`, { 
-          method: 'PATCH'
-      });
-      
-      const data = await response.json();
-
-      if (data.success) {
-          window.location.reload(); 
-      }
   }
 
 })
