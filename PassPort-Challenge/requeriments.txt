@@ -1,0 +1,18 @@
+npm install express bcrypt jsonwebtoken cookie-parser dotenv helmet cors
+    express: El framework mínimo para manejar rutas y peticiones.
+
+    bcrypt: Vital para hashing de contraseñas. Nunca, bajo ninguna circunstancia, guardaremos contraseñas en texto plano.
+
+    jsonwebtoken (JWT): Para crear tokens seguros que identifiquen al usuario.
+
+    cookie-parser: Para que nuestro servidor pueda leer las "migas de pan" (cookies) que envía el navegador.
+
+    dotenv: Para manejar variables de entorno. Aquí guardaremos "secretos" que no deben subirse a GitHub.
+
+    helmet: Un guardaespaldas que configura cabeceras HTTP para prevenir ataques comunes como XSS.
+
+    cors: Controla quién tiene permiso para pedirle datos a tu servidor.
+
+    nodemon (-D): Herramienta de desarrollo que reinicia el servidor cada vez que guardas un cambio.
+
+npm install -D nodemon
