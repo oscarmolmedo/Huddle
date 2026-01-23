@@ -16,6 +16,7 @@ npm install express bcrypt jsonwebtoken cookie-parser dotenv helmet cors
     nodemon (-D): Herramienta de desarrollo que reinicia el servidor cada vez que guardas un cambio.
 
 npm install -D nodemon
+npm install express-rate-limit
 
 #Para arrancar el servidor
 npx nodemon src/app.js

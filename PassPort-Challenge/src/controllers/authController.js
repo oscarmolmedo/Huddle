@@ -25,7 +25,7 @@ const register = async (req, res) => {
             id: users.length + 1,
             email,
             password: hashedPassword, // Guardamos el hash, NUNCA la clave real
-            role: role // Asignamos rol por defecto 'user'
+            role: role || 'user' // Rol por defecto 'user'
         };
         users.push(newUser);
 
