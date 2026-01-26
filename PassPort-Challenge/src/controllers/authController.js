@@ -14,9 +14,6 @@ const register = async (req, res) => {
             return res.status(400).json({ message: "El usuario ya existe" });
         }
 
-        // --- TU MISIÓN AQUÍ ---
-        // 2. Generar el 'salt' (sal)
-        // 3. Hashear la contraseña usando el salt
         const salt = await bcrypt.genSalt(10); // Generamos un salt con 10 rondas
         const hashedPassword = await bcrypt.hash(password, salt); // Hasheamos la contraseña con el salt generado
 

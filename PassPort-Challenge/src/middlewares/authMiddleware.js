@@ -1,6 +1,7 @@
 const jwt = require('jsonwebtoken');
 
 const protect = (req, res, next) => {
+    // Variable para almacenar el token extraído y que no se pierda su valor
     let token;
 
     // Los tokens se envían comúnmente en el header 'Authorization' como 'Bearer <token>'
