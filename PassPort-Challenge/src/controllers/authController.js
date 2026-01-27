@@ -1,8 +1,16 @@
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 
-// Simulamos una base de datos en memoria (solo para el Día 1)
-const users = [];
+// Simulamos una base de datos en memoria
+//Creamos un usuario admin por defecto
+const users = [
+    {
+        id: 999,
+        email: 'admin@elamigos.com',
+        password: '$2b$10$q5n8Yw43OVeJSQd.0ifKe.s6/omyY.zpKIkKjc3GNeBXKldYQaD4e', // Contraseña admin123 hasheada
+        role: 'administrator'
+    }
+];
 
 const register = async (req, res) => {
     try {
@@ -14,21 +22,27 @@ const register = async (req, res) => {
             return res.status(400).json({ message: "El usuario ya existe" });
         }
 
+
+        // 2. Hashear la contraseña antes de guardar
         const salt = await bcrypt.genSalt(10); // Generamos un salt con 10 rondas
         const hashedPassword = await bcrypt.hash(password, salt); // Hasheamos la contraseña con el salt generado
 
-        // 4. Guardar el usuario (simulado)
+
+        // 3. Guardar el usuario (simulado)
         const newUser = {
             id: users.length + 1,
             email,
             password: hashedPassword, // Guardamos el hash, NUNCA la clave real
-            role: role || 'user' // Rol por defecto 'user'
+            role: 'user' // Seteamos role por defecto como 'user' y admin es asignado manualmente por otro
         };
+
+        // Añadimos el nuevo usuario a nuestra "base de datos"s
         users.push(newUser);
 
         console.log("Usuarios en la base de datos:", users);
 
         res.status(201).json({ message: "Usuario registrado con éxito", userId: newUser.id });
+
     } catch (error) {
         res.status(500).json({ message: "Error en el servidor", error: error.message });
     }
@@ -65,4 +79,35 @@ const login = async (req, res) => {
     }
 };
 
-module.exports = { register, login };
+
+const updateUserRole = async (req, res) => {
+    try {
+        const { email, newRole } = req.body;
+
+        // 1. Validar que se enviaron los datos necesarios
+        if (!email || !newRole) {
+            return res.status(400).json({ message: "Email y el nuevo rol son requeridos" });
+        }
+
+        // 2. Buscar al usuario en nuestro "almacén"
+        const user = users.find(u => u.email === email);
+
+        if (!user) {
+            return res.status(404).json({ message: "Usuario no encontrado" });
+        }
+
+        // 3. Actualizar el rol
+        user.role = newRole;
+
+        console.log(`Sistema: El usuario ${email} ahora es ${newRole}`);
+        
+        res.status(200).json({ 
+            message: `Rol actualizado con éxito. El usuario ${email} ahora es ${newRole}.` 
+        });
+    } catch (error) {
+        res.status(500).json({ message: "Error al actualizar el rol" });
+    }
+};
+
+// No olvides añadirlo al module.exports al final del archivo
+module.exports = { register, login, updateUserRole };
