@@ -48,35 +48,54 @@ const register = async (req, res) => {
     }
 };
 
+// Controlador para login que maneja tanto JWT como sesión basada en cookies
 const login = async (req, res) => {
     try {
-        const { email, password } = req.body;
+        const { email, password, stayLoggedIn } = req.body; // stayLoggedIn será un booleano
 
-        // 1. Buscar al usuario por email
         const user = users.find(u => u.email === email);
-        if (!user) {
-            return res.status(400).json({ message: "Credenciales inválidas" });
+        if (!user || !(await bcrypt.compare(password, user.password))) {
+            return res.status(401).json({ message: "Credenciales inválidas" });
         }
 
-        // 2. Comparar la contraseña ingresada con el hash almacenado
-        const isPasswordValid = await bcrypt.compare(password, user.password);
-        if (!isPasswordValid) {
-            return res.status(400).json({ message: "Credenciales inválidas" });
+        if (stayLoggedIn) {
+            // --- OPCIÓN A: SESIÓN PERSISTENTE (COOKIES) ---
+            req.session.user = { id: user.id, email: user.email, role: user.role };
+            return res.status(200).json({ 
+                message: "Login exitoso con Sesión Persistente (Cookie establecida)",
+                authType: "session"
+            });
+        } else {
+            // --- OPCIÓN B: SESIÓN SIN ESTADO (JWT) ---
+            const token = jwt.sign(
+                { id: user.id, email: user.email, role: user.role },
+                process.env.JWT_SECRET,
+                { expiresIn: '15m' }            // El token expira en 15 minutos
+            );
+            return res.status(200).json({ 
+                message: "Login exitoso con JWT",
+                token,
+                authType: "jwt"
+            });
         }
-
-// --- GENERACIÓN DEL JWT ---
-        // Firmamos un token que contiene el ID del usuario
-        const token = jwt.sign(
-            { id: user.id, email: user.email, role: user.role }, 
-            process.env.JWT_SECRET, 
-            { expiresIn: '1h' }
-        );
-
-        // Enviamos el token al cliente. El cliente deberá guardarlo (ej. LocalStorage)
-        res.status(200).json({ message: "Login exitoso", token: token});
     } catch (error) {
-        res.status(500).json({ message: "Error en el servidor", error: error.message });
+        res.status(500).json({ message: "Error en el servidor" });
     }
+};
+
+// Controlador para logout que maneja tanto sesión como JWT
+const logout = (req, res) => {
+    // Destruir sesión si existe
+    req.session.destroy((err) => {
+        if (err) console.log("Error destruyendo sesión");
+        
+        // Limpiar la cookie del navegador explícitamente
+        res.clearCookie('connect.sid'); 
+        
+        res.status(200).json({ 
+            message: "Logout exitoso. Sesión eliminada y Cookie borrada. (Si usabas JWT, recuerda borrarlo en el cliente)" 
+        });
+    });
 };
 
 
@@ -109,5 +128,5 @@ const updateUserRole = async (req, res) => {
     }
 };
 
-// No olvides añadirlo al module.exports al final del archivo
-module.exports = { register, login, updateUserRole };
+
+module.exports = { register, login, logout, updateUserRole };

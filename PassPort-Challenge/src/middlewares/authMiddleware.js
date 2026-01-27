@@ -1,34 +1,30 @@
 const jwt = require('jsonwebtoken');
 
 const protect = (req, res, next) => {
-    // Variable para almacenar el token extraído y que no se pierda su valor
-    let token;
+    // 1. Intentar validar por JWT (Header Authorization)
+    let token = req.headers.authorization?.startsWith('Bearer') 
+                ? req.headers.authorization.split(' ')[1] 
+                : null;
 
-    // Los tokens se envían comúnmente en el header 'Authorization' como 'Bearer <token>'
-    if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
+    if (token) {
         try {
-            // 1. Extraer el token del string "Bearer XXXXXX"
-            token = req.headers.authorization.split(' ')[1];
-
-            // 2. Verificar el token usando nuestra clave secreta
             const decoded = jwt.verify(token, process.env.JWT_SECRET);
-
-            // 3. Añadir los datos del usuario decodificados al objeto 'req' 
-            // para que las siguientes funciones tengan acceso a ellos
-            req.user = decoded;
-
-            // 4. Continuar al siguiente paso (el controlador de la ruta)
-            next();
+            req.user = decoded; // Inyectamos el usuario del token
+            return next();
         } catch (error) {
-            return res.status(401).json({ message: "No autorizado, token fallido" });
+            return res.status(401).json({ message: "JWT inválido o expirado" });
         }
     }
 
-    if (!token) {
-        return res.status(401).json({ message: "No autorizado, no hay token" });
+    // 2. Si no hay JWT, intentar validar por Sesión (Cookie)
+    if (req.session && req.session.user) {
+        req.user = req.session.user; // Inyectamos el usuario de la sesión
+        return next();
     }
-};
 
+    // 3. Si no hay ninguno, denegar acceso
+    res.status(401).json({ message: "No autorizado. Debes iniciar sesión." });
+};
 
 
 module.exports = { protect };

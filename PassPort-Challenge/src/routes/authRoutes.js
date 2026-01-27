@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 
 // Importamos los controladores y middlewares necesarios
-const { register, login, updateUserRole } = require('../controllers/authController');
+const { register, login, logout,updateUserRole } = require('../controllers/authController');
 const { protect } = require('../middlewares/authMiddleware');
 const { authorize } = require('../middlewares/roleMiddleware');
 const { validateAuth } = require('../middlewares/validatorMiddleware');
@@ -33,5 +33,10 @@ router.get('/admin', protect, authorize('admin'), (req, res) => {
 router.patch('/update-role', protect, authorize('administrator'), (req, res, next) => {
     next();
 }, updateUserRole);
+
+router.post('/logout', protect, (req, res) => {
+    // Llamamos al controlador de logout
+    logout(req, res);
+});
 
 module.exports = router;
