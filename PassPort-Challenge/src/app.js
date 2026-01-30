@@ -1,14 +1,14 @@
-const express = require('express');
-const helmet = require('helmet');
-const cookieParser = require('cookie-parser');
-const cors = require('cors');
-const app = express();
-const session = require('express-session');
-const rateLimit = require('express-rate-limit');
+const express               = require('express');
+const helmet                = require('helmet');
+const cookieParser          = require('cookie-parser');
+const cors                  = require('cors');
+const app                   = express();
+const session               = require('express-session');
+const rateLimit             = require('express-rate-limit');
 
 // Se exporta archivos y configuraciones de entorno
 require('dotenv').config();                         // Carga variables de entorno desde .env
-const PORT = process.env.PORT;                      // Puerto desde variables de entorno o default en .env
+const PORT                  = process.env.PORT;     // Puerto desde variables de entorno o default en .env
 const authRoutes = require('./routes/authRoutes');  // Rutas de autenticación
 
 
@@ -30,8 +30,9 @@ app.use(helmet());                  // Protege cabeceras
 app.use(cors());                    // Control de acceso
 app.use(express.json());            // Permite leer JSON en el body
 app.use(cookieParser());            // Permite manejar cookies
+app.use(express.urlencoded({ extended: true })); // Permite leer datos de formularios | Para pruebas con Postman
 
-// Configuración de sesiones
+// Configuración de sesiones (Cookies)
 app.use(session({
     secret: process.env.SESSION_SECRET || 'secreto_temporal',
     resave: false,

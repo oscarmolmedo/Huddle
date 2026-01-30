@@ -1,20 +1,20 @@
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 
-// Simulamos una base de datos en memoria
-//Creamos un usuario admin por defecto
-const users = [
+
+// --- Simulamos una base de datos en memoria ---
+const users = [                                                                             
     {
-        id: 999,
+        id: 999,                                                                            //Creamos un usuario admin por defecto
         email: 'admin@elamigos.com',
-        password: '$2b$10$q5n8Yw43OVeJSQd.0ifKe.s6/omyY.zpKIkKjc3GNeBXKldYQaD4e', // Contraseña admin123 hasheada
+        password: '$2b$10$q5n8Yw43OVeJSQd.0ifKe.s6/omyY.zpKIkKjc3GNeBXKldYQaD4e',           // Contraseña admin123 hasheada
         role: 'administrator'
     }
 ];
 
 const register = async (req, res) => {
     try {
-        const { email, password, role } = req.body;
+        const { email, password} = req.body;
 
         // 1. Validar si el usuario ya existe
         const userExists = users.find(u => u.email === email);
@@ -24,19 +24,19 @@ const register = async (req, res) => {
 
 
         // 2. Hashear la contraseña antes de guardar
-        const salt = await bcrypt.genSalt(10); // Generamos un salt con 10 rondas
-        const hashedPassword = await bcrypt.hash(password, salt); // Hasheamos la contraseña con el salt generado
+        const salt = await bcrypt.genSalt(10);                                              // Generamos un salt con 10 rondas
+        const hashedPassword = await bcrypt.hash(password, salt);                           // Hasheamos la contraseña con el salt generado
 
 
-        // 3. Guardar el usuario (simulado)
+        // 3. Guardar el usuario
         const newUser = {
             id: users.length + 1,
             email,
-            password: hashedPassword, // Guardamos el hash, NUNCA la clave real
-            role: 'user' // Seteamos role por defecto como 'user' y admin es asignado manualmente por otro
+            password: hashedPassword,                                                       // Guardamos el hash, NUNCA la clave real
+            role: 'user'                                                                    // Seteamos role por defecto como 'user' y admin es asignado manualmente por otro
         };
 
-        // Añadimos el nuevo usuario a nuestra "base de datos"s
+        // Añadimos el nuevo usuario a nuestra "base de datos"
         users.push(newUser);
 
         console.log("Usuarios en la base de datos:", users);
@@ -48,13 +48,13 @@ const register = async (req, res) => {
     }
 };
 
-// Controlador para login que maneja tanto JWT como sesión basada en cookies
+// --- Controlador para login que maneja tanto JWT como sesión basada en cookies ---
 const login = async (req, res) => {
     try {
-        const { email, password, stayLoggedIn } = req.body; // stayLoggedIn será un booleano
+        const { email, password, stayLoggedIn } = req.body;                                 // stayLoggedIn será un booleano
 
         const user = users.find(u => u.email === email);
-        if (!user || !(await bcrypt.compare(password, user.password))) {
+        if (!user || !(await bcrypt.compare(password, user.password))) {                    //bcrypt.compare devuelve true o falses
             return res.status(401).json({ message: "Credenciales inválidas" });
         }
 
@@ -70,7 +70,7 @@ const login = async (req, res) => {
             const token = jwt.sign(
                 { id: user.id, email: user.email, role: user.role },
                 process.env.JWT_SECRET,
-                { expiresIn: '15m' }            // El token expira en 15 minutos
+                { expiresIn: '15m' }                                                        // El token expira en 15 minutos
             );
             return res.status(200).json({ 
                 message: "Login exitoso con JWT",
@@ -83,14 +83,14 @@ const login = async (req, res) => {
     }
 };
 
-// Controlador para logout que maneja tanto sesión como JWT
+
+// --- Controlador para logout que maneja tanto sesión como JWT ---
 const logout = (req, res) => {
-    // Destruir sesión si existe
-    req.session.destroy((err) => {
-        if (err) console.log("Error destruyendo sesión");
-        
-        // Limpiar la cookie del navegador explícitamente
-        res.clearCookie('connect.sid'); 
+    
+    req.session.destroy((err) => {                                                          // Destruir sesión si existe
+        if (err) console.log("Error destruyendo sesión");                       
+
+        res.clearCookie('connect.sid');                                                     // Limpiar la cookie del navegador explícitamente
         
         res.status(200).json({ 
             message: "Logout exitoso. Sesión eliminada y Cookie borrada. (Si usabas JWT, recuerda borrarlo en el cliente)" 
@@ -98,7 +98,7 @@ const logout = (req, res) => {
     });
 };
 
-
+// --- Controlador para actualizar el rol de un usuario (solo administrator tiene acceso) ---
 const updateUserRole = async (req, res) => {
     try {
         const { email, newRole } = req.body;
