@@ -1,2 +1,5 @@
 node_modules/
 .env
+tempCodeRunnerFile.js
+package-lock.json
+package.json
