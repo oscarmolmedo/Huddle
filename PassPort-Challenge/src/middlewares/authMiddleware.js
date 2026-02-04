@@ -9,10 +9,12 @@ const protect = (req, res, next) => {
                 ? req.headers.authorization.split(' ')[1] 
                 : null;
 
+    console.log("Token recibido en middleware:", req.headers.authorization);
+
     if (token) {
         try {
-            const decoded = jwt.verify(token, process.env.JWT_SECRET);
-            req.user = decoded;                                 // Inyectamos el usuario del token
+            const decoded = jwt.verify(token, process.env.JWT_SECRET);      //jwt.verify devuelve un objeto decodificado
+            req.user = decoded;                                             // Inyectamos el usuario del token
             return next();
         } catch (error) {
             return res.status(401).json({ message: "JWT inválido o expirado" });
@@ -21,7 +23,7 @@ const protect = (req, res, next) => {
 
     // 2. Si no hay JWT, intentar validar por Sesión (Cookie)
     if (req.session && req.session.user) {
-        req.user = req.session.user;                            // Inyectamos el usuario de la sesión
+        req.user = req.session.user;                                        // Inyectamos el usuario de la sesión
         console.log("Usuario autenticado vía sesión:", req.session);
         return next();
     }
