@@ -24,6 +24,7 @@ const register = async (req, res) => {
 
 
         // 2. Hashear la contraseña antes de guardar
+        //GenSalt genera un delay por eso usamos await.
         const salt = await bcrypt.genSalt(10);                                              // Generamos un salt con 10 rondas
         const hashedPassword = await bcrypt.hash(password, salt);                           // Hasheamos la contraseña con el salt generado
 
