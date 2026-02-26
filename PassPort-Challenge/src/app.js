@@ -7,16 +7,15 @@ const session               = require('express-session');
 const rateLimit             = require('express-rate-limit');
 
 // Se exporta archivos y configuraciones de entorno
-require('dotenv').config();                         // Carga variables de entorno desde .env
-const PORT                  = process.env.PORT;     // Puerto desde variables de entorno o default en .env
-const authRoutes = require('./routes/authRoutes');  // Rutas de autenticación
-
+require('dotenv').config();                         
+const PORT                  = process.env.PORT;     
+const authRoutes = require('./routes/authRoutes');  
 
 // --- Configuración de Rate Limiting ---
 const apiLimiter = rateLimit({
-    //windowMs: 15 * 60 * 1000,     // 15 minutos
+    //windowMs: 15 * 60 * 1000,     
     windowMs: 30 * 1000,            // 30 segundos
-    max: 5,                         // Máximo 5 peticiones por ventana por IP
+    max: 5,                         
     message: "Demasiadas peticiones desde esta IP, intenta de nuevo en 30 segundos"
 });
 
@@ -39,7 +38,7 @@ app.use(session({
     saveUninitialized: false,
     cookie: {
         httpOnly: true,             // Evita que JS del cliente lea la cookie (previene XSS)
-        secure: false,              // Cambiar a 'true' cuando tengas HTTPS
+        secure: false,              // Cambiar a 'true' para usar HTTPS
         maxAge: 3600000             // 1 hora de vida
     }
 }));

@@ -26,15 +26,15 @@ const register = async (req, res) => {
         // 2. Hashear la contraseña antes de guardar
         //GenSalt genera un delay por eso usamos await.
         const salt = await bcrypt.genSalt(10);                                              // Generamos un salt con 10 rondas
-        const hashedPassword = await bcrypt.hash(password, salt);                           // Hasheamos la contraseña con el salt generado
+        const hashedPassword = await bcrypt.hash(password, salt);                           
 
 
         // 3. Guardar el usuario
         const newUser = {
             id: users.length + 1,
             email,
-            password: hashedPassword,                                                       // Guardamos el hash, NUNCA la clave real
-            role: 'user'                                                                    // Seteamos role por defecto como 'user' y admin es asignado manualmente por otro
+            password: hashedPassword,                                                       
+            role: 'user'                                                                   
         };
 
         // Añadimos el nuevo usuario a nuestra "base de datos"

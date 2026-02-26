@@ -1,4 +1,3 @@
-// --- Middleware de autenticación que maneja tanto JWT como sesión basada en cookies ---
 // Este middleware sirve para proteger rutas y verificar si el usuario está autenticado
 
 const jwt = require('jsonwebtoken');

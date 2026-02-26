@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 
-// Importamos los controladores y middlewares necesarios
+
 const { register, login, logout,updateUserRole }    = require('../controllers/authController');
 const { protect }                                   = require('../middlewares/authMiddleware');
 const { authorize }                                 = require('../middlewares/roleMiddleware');
@@ -18,7 +18,7 @@ router.post('/login', validateAuth, login);
 router.get('/profile', protect, (req, res) => {
     res.json({
         message: "Bienvenido a tu perfil privado",
-        user: req.user              // Aquí verás lo que decodificamos en el middleware
+        user: req.user              
     });
 });
 
