@@ -17,14 +17,17 @@ const authRoutes = require('./routes/authRoutes');
 
 
 //No bloquea ip de proxy sino la del cliente
-app.set('trust proxy', 1);          // Si estás detrás de un proxy (como Heroku, Nginx, etc.)
+app.set('trust proxy', 1);
 
 // --- Middlewares de Seguridad y Utilidad ---
-app.use(helmet());                  // Protege cabeceras
-app.use(cors({origin: `http://localhost:${PORT}`, credentials: true}));                    // Control de acceso
-app.use(express.json());            // Permite leer JSON en el body
-app.use(cookieParser(SECRETRO));            // Permite manejar cookies
-app.use(express.urlencoded({ extended: true })); // Permite leer datos de formularios | Para pruebas con Postman
+app.use(helmet());
+app.use(cors({                                          // Control de acceso para front
+    origin: `http://localhost:${PORT}`, 
+    credentials: true
+}));                    
+app.use(express.json());                                // Permite leer JSON en el body
+app.use(cookieParser(SECRETRO));                        // Permite manejar cookies
+app.use(express.urlencoded({ extended: true }));        // Permite leer datos de formularios | Para pruebas con Postman
 
 // --- Configuración de Rate Limiting ---
 const apiLimiter = rateLimit({
@@ -41,14 +44,14 @@ app.use(session({
     saveUninitialized: true,
     cookie: {
         httpOnly: true,                                 // Evita que JS del cliente lea la cookie (previene XSS)
-        secure: process.env.NODE_ENV === 'production',              
+        secure: false,              
         sameSite: 'lax',
         maxAge: 3600000                                 // 1 hora de vida
     }
 }));
 
 
-// --- 1. Configuración de Double CSRF ---
+// ---Configuración de Double CSRF---
 const doubleCsrfOptions = {
     getSecret: () => SECRETRO,
     cookieName: "csrfToken", 
@@ -56,7 +59,7 @@ const doubleCsrfOptions = {
     cookieOptions: {
         httpOnly: true,
         sameSite: "Lax",
-        secure: process.env.NODE_ENV === 'production',
+        secure: false,
     },
     size: 64,
     ignoredMethods: ["GET"],
@@ -80,20 +83,9 @@ app.get('/api/get-csrf-token', (req, res) => {
     res.json({ csrfToken: token });
 });
 
-app.use('/api/auth', apiLimiter);                        // Aplicar rate limiting a todas las rutas de autenticación
+app.use('/api/auth', apiLimiter);                        // Aplicar rate limiting a todas las rutas
 app.use('/api/auth', doubleCsrfProtection,authRoutes);   // Rutas de autenticación
 
-// ---Manejo de Errores de CSRF---
-// app.use((err, req, res, next) => {
-//     if (err.code === "EBADCSRFTOKEN") {
-//         console.log("--- DEBUG CSRF ---");
-//         console.log("Token en Header:", req.headers["x-csrf-token"]);
-//         console.log("Cookies recibidas:", req.cookies);
-//         console.log("Session ID actual:", req.sessionID);
-//         return res.status(403).json({ error: "Token CSRF inválido", detalle: err.message });
-//     }
-//     next(err);
-// });
 
 // Ruta de prueba para verificar que el servidor está corriendo
 app.get('/', (req, res) => {

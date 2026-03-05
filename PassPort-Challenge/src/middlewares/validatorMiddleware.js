@@ -17,7 +17,6 @@ const validateAuth = (req, res, next) => {
         return res.status(400).json({ message: "La contraseña debe tener al menos 6 caracteres" });
     }
 
-    // Si todo está bien, pasamos al siguiente paso
     next();
 };
 
