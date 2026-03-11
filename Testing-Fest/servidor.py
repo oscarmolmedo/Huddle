@@ -1,4 +1,5 @@
 import socket, os, threading, time
+from logic import procesar_protocolo, validar_nick, limpiar_mensaje
 os.system("cls")
 
 
@@ -46,7 +47,7 @@ def enviar_a_todos(remitente, msg):
 def procesar_comando (client_socket, client_addr,contenido):
 
     ###Para separar comando de nombre<nick>
-    cmd, arg = contenido.split(" ",1)
+    cmd, arg = procesar_protocolo(contenido)
 
     if cmd == "exit":
         print("Procesando comando...")
@@ -56,10 +57,15 @@ def procesar_comando (client_socket, client_addr,contenido):
         return False
     
     if cmd == "nick":
-        nicks[client_socket]= arg
-        print(f"{client_addr} ahora es {arg}")
+        if validar_nick(arg):
+            nicks[client_socket]= arg
+            print(f"{client_addr} ahora es {arg}")
+            return True
+        else:
+            print(f"Nick rechazado para {client_addr}")
+            return True
+            
 
-        return True
         
 #TRATAR CONEXION CLIENTES
 def manejar_cliente(client_sock, client_addr):
@@ -74,9 +80,15 @@ def manejar_cliente(client_sock, client_addr):
                 if client_sock in clientes:
                     desconectar_cliente(client_sock, client_addr)
                 break
-
-            tipo, contenido = msg.decode().split("|",1)
-            print('El contenido es',contenido)
+            
+            try:
+                data_decode= msg.decode()
+                tipo, contenido = procesar_protocolo(data_decode)
+                contenido = limpiar_mensaje(contenido)
+                print('El contenido es',contenido)
+            except ValueError as e:
+                print(f"Error de protocolo : {e}")
+                continue
 
 
             if tipo == "MSG":
