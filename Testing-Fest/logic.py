@@ -23,4 +23,26 @@ def limpiar_mensaje(mensaje):
     Limpia todos los espacios al principio y final
     de la cadena
     """
-    return mensaje.strip()
+    if isinstance(mensaje, str):
+        return mensaje.strip()
+    else:
+        return False
+
+def es_mensaje_valido(mensaje):
+    """
+    .strip() si devuelve algo es True. Si queda "" devuelve False.
+    Si mensaje es valido verifica longitud de cadena
+    """
+    #OPCIÓN LARGA
+    # es_valido = bool(mensaje.strip())
+
+    # if es_valido:
+    #     if len(mensaje) > 100:
+    #         return False
+    #     else:
+    #         return True
+    # else:
+    #     return es_valido
+
+    #OPCIÓN COMPACTA
+    return bool(mensaje.strip() and len(mensaje) <= 100)
