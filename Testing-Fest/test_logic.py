@@ -1,7 +1,7 @@
-from logic import procesar_protocolo, validar_nick, limpiar_mensaje, es_mensaje_valido
+from socket_code.logic import procesar_protocolo, validar_nick, limpiar_mensaje, es_mensaje_valido
 import pytest
 
-# --- LOGICA DE FORMATO CORRECTO ---
+# --- LOGICA DE FORMATO CORRECTO TIPO|CONTENIDO ---
 # Caso Positivo
 def test_protocolo_mensaje_valido():
     tipo, contenido = procesar_protocolo("MSG|hola servidor")
