@@ -1,12 +1,9 @@
 import socket, os, threading, time
-from logic import procesar_protocolo, validar_nick, limpiar_mensaje
+from socket_code.logic import procesar_protocolo, validar_nick, limpiar_mensaje
 os.system("cls")
 
 
-###INICIALIZACION###
-socket_server = socket.socket(socket.AF_INET, socket.SOCK_STREAM )
-socket_server.bind(("130.10.10.76", 5000))
-socket_server.listen()                             #cantidad de clientes en cola
+
 
 #lista de clientes
 clientes = []
@@ -47,7 +44,8 @@ def enviar_a_todos(remitente, msg):
 def procesar_comando (client_socket, client_addr,contenido):
 
     ###Para separar comando de nombre<nick>
-    cmd, arg = procesar_protocolo(contenido)
+    #cmd, arg = procesar_protocolo(contenido)
+    cmd, arg = contenido.split(" ", 1)
 
     if cmd == "exit":
         print("Procesando comando...")
@@ -112,7 +110,12 @@ def manejar_cliente(client_sock, client_addr):
 
 print("SERVIDOR INICIADO")
 
-while True:
+if __name__ == "__main__":
+
+    ###INICIALIZACION###
+    socket_server = socket.socket(socket.AF_INET, socket.SOCK_STREAM )
+    socket_server.bind(("130.10.10.76", 5000))
+    socket_server.listen()                             #cantidad de clientes en cola
 
     client_socket, client_addr = socket_server.accept()
     print(f"[+] Cliente conectado {client_addr}")
@@ -125,3 +128,4 @@ while True:
 
     hilo = threading.Thread(target=manejar_cliente, args=(client_socket,client_addr), daemon=True)
     hilo.start()
+
