@@ -1,5 +1,5 @@
 import socket, os, threading, time
-from socket_code.logic import procesar_protocolo, validar_nick, limpiar_mensaje
+from logic import procesar_protocolo, validar_nick, limpiar_mensaje
 os.system("cls")
 
 
@@ -80,10 +80,11 @@ def manejar_cliente(client_sock, client_addr):
                 break
             
             try:
+                #Recibimos comando y procesamos
                 data_decode= msg.decode()
                 tipo, contenido = procesar_protocolo(data_decode)
                 contenido = limpiar_mensaje(contenido)
-                print('El contenido es',contenido)
+                #print('El contenido es',contenido)
             except ValueError as e:
                 print(f"Error de protocolo : {e}")
                 continue
@@ -110,11 +111,11 @@ def manejar_cliente(client_sock, client_addr):
 
 print("SERVIDOR INICIADO")
 
-if __name__ == "__main__":
-
+#if __name__ == "__main__":
+while True:
     ###INICIALIZACION###
     socket_server = socket.socket(socket.AF_INET, socket.SOCK_STREAM )
-    socket_server.bind(("130.10.10.76", 5000))
+    socket_server.bind(("127.0.0.1", 5000))
     socket_server.listen()                             #cantidad de clientes en cola
 
     client_socket, client_addr = socket_server.accept()
