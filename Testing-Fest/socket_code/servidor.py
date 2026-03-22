@@ -1,8 +1,10 @@
+import sys
+import os
+sys.path.append(os.path.dirname(__file__))
+
 import socket, os, threading, time
-from logic import procesar_protocolo, validar_nick, limpiar_mensaje
+from logic import validar_nick, procesar_protocolo, es_mensaje_valido
 os.system("cls")
-
-
 
 
 #lista de clientes
@@ -83,8 +85,8 @@ def manejar_cliente(client_sock, client_addr):
                 #Recibimos comando y procesamos
                 data_decode= msg.decode()
                 tipo, contenido = procesar_protocolo(data_decode)
-                contenido = limpiar_mensaje(contenido)
-                #print('El contenido es',contenido)
+                contenido = es_mensaje_valido(contenido)
+                print('El contenido es',type(contenido))
             except ValueError as e:
                 print(f"Error de protocolo : {e}")
                 continue
@@ -99,7 +101,7 @@ def manejar_cliente(client_sock, client_addr):
                 if not continuar:
                     break
 
-            print(f"{nicks[client_sock]}>>> {msg.decode()}")
+            print(f"{nicks[client_sock]}>>> {tipo}|{contenido}")
 
         except (ConnectionResetError, ConnectionAbortedError) as e:
             print("[!] Cliente desconectado de forma abrupta.")
@@ -111,8 +113,8 @@ def manejar_cliente(client_sock, client_addr):
 
 print("SERVIDOR INICIADO")
 
-#if __name__ == "__main__":
-while True:
+if __name__ == "__main__":
+#while True:
     ###INICIALIZACION###
     socket_server = socket.socket(socket.AF_INET, socket.SOCK_STREAM )
     socket_server.bind(("127.0.0.1", 5000))
