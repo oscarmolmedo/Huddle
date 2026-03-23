@@ -1,6 +1,8 @@
-import socket, selectors, time
-import types
+import socket, selectors, time, sys, os
+sys.path.append(os.path.dirname(__file__))
+
 from logic import procesar_protocolo, validar_nick, limpiar_mensaje
+
 
 #lista de clientes
 clientes = []
