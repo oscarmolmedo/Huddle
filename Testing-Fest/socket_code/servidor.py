@@ -28,6 +28,13 @@ def aceptar_conexion(sock):
 #PROCESAR DESCONEXION
 def desconectar_cliente(client_sock, client_addr):
 
+    # Intentar desregistrar del selector
+    try:
+        sel.unregister(client_sock)
+    except (KeyError, ValueError):
+        #Se dispara una de las dos exepciones si el selector ya no existe o no es valido
+        pass
+
     if client_sock in clientes:
         clientes.remove(client_sock)
 
@@ -87,8 +94,11 @@ def leer_mensaje(conn, addr):
             contenido = limpiar_mensaje(contenido)
             
             if tipo == "MSG":
-                enviar_a_todos(conn, contenido)
-                print(f">>> {nicks[conn]}: {contenido}")
+                try:
+                    enviar_a_todos(conn, contenido)
+                    print(f">>> {nicks[conn]}: {contenido}")
+                except:
+                    desconectar_cliente(conn,addr)
             elif tipo == "CMD":
                 procesar_comando(conn, addr, contenido)
         else:
@@ -105,6 +115,7 @@ def cerrar_conexion(conn, addr):
 
 # --- BUCLE PRINCIPAL  ---
 def iniciar_servidor():
+    #Listen Sockect
     lsock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     lsock.bind(("127.0.0.1", 5000))
     lsock.listen()
