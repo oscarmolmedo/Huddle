@@ -26,4 +26,7 @@ def es_mensaje_valido(mensaje):
     return bool(mensaje.strip() and len(mensaje) <= 100)
 
 def limpiar_mensaje(mensaje):
+    """
+    Limpia espacios de mensaje.
+    """
     return mensaje.strip()
