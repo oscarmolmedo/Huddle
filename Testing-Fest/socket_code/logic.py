@@ -24,3 +24,6 @@ def es_mensaje_valido(mensaje):
     """
     #OPCIÓN COMPACTA
     return bool(mensaje.strip() and len(mensaje) <= 100)
+
+def limpiar_mensaje(mensaje):
+    return mensaje.strip()
