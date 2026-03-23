@@ -1,16 +1,27 @@
-import sys
-import os
-sys.path.append(os.path.dirname(__file__))
-
-import socket, os, threading, time
-from logic import validar_nick, procesar_protocolo, es_mensaje_valido
-os.system("cls")
-
+import socket, selectors, time
+import types
+from logic import procesar_protocolo, validar_nick, limpiar_mensaje
 
 #lista de clientes
 clientes = []
 #diccionario socket-nick
 nicks = {}
+
+# Se crea el selector
+sel = selectors.DefaultSelector()
+
+def aceptar_conexion(sock):
+    conn, addr = sock.accept()
+    print(f"[+] Conectado: {addr}")
+    conn.setblocking(False) #Sockes  no bloqueantes
+    
+    # Registramos el nuevo socket para lectura (EVENT_READ)
+    # Usamos 'data' para guardar información extra si queremos
+    sel.register(conn, selectors.EVENT_READ, data=addr)
+    
+    # Se carga en la listaw
+    clientes.append(conn)
+    nicks[conn] = None
 
 #PROCESAR DESCONEXION
 def desconectar_cliente(client_sock, client_addr):
@@ -26,7 +37,6 @@ def desconectar_cliente(client_sock, client_addr):
         client_sock.close()
     except:
         pass
-  
 
 #BROADCAST | REMITENTE ES CLIENTE_SOCKET
 def enviar_a_todos(remitente, msg):
@@ -66,69 +76,55 @@ def procesar_comando (client_socket, client_addr,contenido):
             return True
             
 
-        
-#TRATAR CONEXION CLIENTES
-def manejar_cliente(client_sock, client_addr):
-
-    while True:
-        try:
-
-            msg = client_sock.recv(4096)
-
-            if not msg:
-                print("[!] Desconexion detectada")
-                if client_sock in clientes:
-                    desconectar_cliente(client_sock, client_addr)
-                break
+def leer_mensaje(conn, addr):
+    try:
+        msg = conn.recv(4096)
+        if msg:
+            data_decode = msg.decode()
+            tipo, contenido = procesar_protocolo(data_decode)
+            contenido = limpiar_mensaje(contenido)
             
-            try:
-                #Recibimos comando y procesamos
-                data_decode= msg.decode()
-                tipo, contenido = procesar_protocolo(data_decode)
-                contenido = es_mensaje_valido(contenido)
-                print('El contenido es',type(contenido))
-            except ValueError as e:
-                print(f"Error de protocolo : {e}")
-                continue
-
-
             if tipo == "MSG":
-                enviar_a_todos(client_sock, contenido)
-
-
+                enviar_a_todos(conn, contenido)
+                print(f">>> {nicks[conn]}: {contenido}")
             elif tipo == "CMD":
-                continuar = procesar_comando(client_sock,client_addr ,contenido)
-                if not continuar:
-                    break
+                procesar_comando(conn, addr, contenido)
+        else:
+            # Si no hay datos, es una desconexión limpia
+            cerrar_conexion(conn, addr)
+    except Exception:
+        # Desconexión abrupta
+        cerrar_conexion(conn, addr)
 
-            print(f"{nicks[client_sock]}>>> {tipo}|{contenido}")
+def cerrar_conexion(conn, addr):
+    print(f"[-] Desconectando {addr}")
+    sel.unregister(conn)
+    desconectar_cliente(conn, addr)
 
-        except (ConnectionResetError, ConnectionAbortedError) as e:
-            print("[!] Cliente desconectado de forma abrupta.")
-            print(e)
+# --- BUCLE PRINCIPAL  ---
+def iniciar_servidor():
+    lsock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    lsock.bind(("127.0.0.1", 5000))
+    lsock.listen()
+    lsock.setblocking(False)    
+    sel.register(lsock, selectors.EVENT_READ, data=None)
 
-            desconectar_cliente(client_sock, client_addr)
-            break
+    print("SERVIDOR INICIADO")
+    try:
+        while True:
+            eventos = sel.select(timeout=None) # Queda en escucha
+            for key, mask in eventos:
+                if key.data is None:
+                    # Si no hay data, es el socket principal (nueva conexión)
+                    aceptar_conexion(key.fileobj)
+                else:
+                    # Es un cliente existente con datos listos
+                    leer_mensaje(key.fileobj, key.data)
+    except KeyboardInterrupt:
+        print("Cerrando servidor...")
+    finally:
+        sel.close()
 
-
-print("SERVIDOR INICIADO")
 
 if __name__ == "__main__":
-#while True:
-    ###INICIALIZACION###
-    socket_server = socket.socket(socket.AF_INET, socket.SOCK_STREAM )
-    socket_server.bind(("127.0.0.1", 5000))
-    socket_server.listen()                             #cantidad de clientes en cola
-
-    client_socket, client_addr = socket_server.accept()
-    print(f"[+] Cliente conectado {client_addr}")
-
-    welcome_message = f"--|Bienvenido {client_addr} a MAIN_SERVER|-- \n### /help para ver comandos ###".encode()
-    client_socket.send(welcome_message)
-
-    clientes.append(client_socket)
-    nicks[client_socket]= None
-
-    hilo = threading.Thread(target=manejar_cliente, args=(client_socket,client_addr), daemon=True)
-    hilo.start()
-
+    iniciar_servidor()
