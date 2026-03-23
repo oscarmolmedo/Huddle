@@ -6,17 +6,27 @@ import socket_code.servidor as servidor
 
 
 # --- PRUEBAS UNITARIAS (Funciones Críticas) ---
+def test_unit_protocolo_valido():
+    a,b =procesar_protocolo("CMD|nick") 
+    assert a,b is True
 def test_unit_protocolo_invalido():
     with pytest.raises(ValueError):
         procesar_protocolo("mensaje_sin_pipe")
+        
 
 # VALIDAR NICK
 def test_unit_nick_valido():
     assert validar_nick("olos") is True
+def test_unit_nick_invalido():
+    assert validar_nick("H1") is False
     
 # --- PRUEBA TDD (Validación de longitud y contenido) ---
-def test_tdd_mensaje_vacio_y_largo():
+#RED
+def test_es_mensaje_valido_falla_si_esta_vacio():
     assert es_mensaje_valido("   ") is False
+
+#GREEN
+def test_es_mensaje_valido_falla_si_es_muy_largo():
     assert es_mensaje_valido("A" * 101) is False
 
 #--- PRUEBAS DE INTEGRACIÓN (Múltiples clientes y Broadcast) ---
