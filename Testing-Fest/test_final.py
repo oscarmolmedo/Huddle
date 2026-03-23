@@ -6,13 +6,19 @@ import socket_code.servidor as servidor
 
 
 # --- PRUEBAS UNITARIAS (Funciones Críticas) ---
+#Procesar Protocolo
 def test_unit_protocolo_valido():
     a,b =procesar_protocolo("CMD|nick") 
     assert a,b is True
 def test_unit_protocolo_invalido():
     with pytest.raises(ValueError):
         procesar_protocolo("mensaje_sin_pipe")
-        
+
+#Validar mensaje
+def test_unit_es_mensaje_valido():
+    assert es_mensaje_valido("Hola como estas? :)") is True
+def test_unit_es_mensaje_invalido():
+    assert es_mensaje_valido("Hola como estas? :)" * 50) is False
 
 # VALIDAR NICK
 def test_unit_nick_valido():
