@@ -22,7 +22,6 @@ def es_mensaje_valido(mensaje):
     .strip() si devuelve algo es True. Si queda "" devuelve False.
     Si mensaje es valido verifica longitud de cadena
     """
-    #OPCIÓN COMPACTA
     return bool(mensaje.strip() and len(mensaje) <= 100)
 
 def limpiar_mensaje(mensaje):
