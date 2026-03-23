@@ -1,79 +1,120 @@
-import socket, sys, selectors, os
-from logic import validar_nick
+import socket, os, threading, time
+from logic import validar_nick, limpiar_mensaje
 
-sel = selectors.DefaultSelector()
+###PARA LIMPIAR EN CADA EJECUIÓN
+os.system("cls")
 
-def enviar_mensaje(sock):
-    # Leemos de la entrada estándar (teclado)
-    msg = sys.stdin.readline().strip()
-    if not msg:
-        return
+def intentar_conexion (ip, puerto, reintentos=3, espera=2):
 
-    tipo_A = "CMD|"
-    tipo_B = "MSG|"
+    for i in range(reintentos):
+        try:
+            s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            s.connect((ip, puerto))
 
-    if msg.startswith("/"):
-        comando = msg[1:].split(" ", 1)
-        nombre_cmd = comando[0]
+            return s
         
-        if nombre_cmd == "exit":
-            print("Saliendo...")
-            sel.unregister(sock)
-            sock.close()
-            sys.exit()
-            
-        elif nombre_cmd == "nick":
-            nuevo_nick = input("Ingrese su nuevo NICK: ")
-            if validar_nick(nuevo_nick):
-                payload = f"{tipo_A}nick {nuevo_nick}".encode()
-                sock.sendall(payload)
-            else:
-                print("Nick inválido (mínimo 3 caracteres).")
-    else:
-        # Mensaje normal
-        sock.sendall(f"{tipo_B}{msg}".encode())
+        except ConnectionRefusedError:
+            print(f"Intento {i+1}/{reintentos}: servidor no disponible.")
+            time.sleep(espera)
     
+    return None
+
+###POR CADA SALTO DE LÍNEA IMPRIME >>
+def pretty_console():
+
     print(">> ", end="", flush=True)
 
-def recibir_mensaje(sock):
-    data = sock.recv(4096)
-    if data:
-        print(f"\n< {data.decode()}")
-        print(">> ", end="", flush=True)
-    else:
-        print("\n[!] Conexión perdida con el servidor.")
-        sel.unregister(sock)
-        sock.close()
-        sys.exit()
-
-def iniciar_cliente(ip, puerto):
-    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    try:
-        sock.connect((ip, puerto))
-        sock.setblocking(False)
-        print(f"Conectado a {ip}:{puerto}")
-        print(">> ", end="", flush=True)
-
-        # Registramos el socket para recibir mensajes
-        sel.register(sock, selectors.EVENT_READ, data=recibir_mensaje)
-        
-        # Registramos la entrada estándar (teclado) para enviar mensajes
-        # sys.stdin es el archivo que representa lo que escribes
-        sel.register(sys.stdin, selectors.EVENT_READ, data=enviar_mensaje)
-
-        while True:
-            eventos = sel.select()
-            for key, mask in eventos:
-                callback = key.data
-                callback(key.fileobj)
+def escuchar(sock):
+    
+    while True:
+        try:
+            data_in = sock.recv(4096)
+            
+            if not data_in:
+                print("Conexion cerrada.")
                 
-    except ConnectionRefusedError:
-        print("Servidor no disponible.")
-    except KeyboardInterrupt:
-        print("\nCerrando cliente...")
-    finally:
-        sel.close()
+                break
+            
+            ###MUESTRA CONVERSACINOES ENTRE CLIENTES
+            print("\n<", data_in.decode())
+            pretty_console()
 
-if __name__ == "__main__":
-    os.system("cls")
-    iniciar_cliente('127.0.0.1', 5000)
+        except:
+            break
+
+def enviar(sock):
+
+    while True:
+        
+        msg = input("")
+        tipo_A = "CMD|"
+        tipo_B = "MSG|"
+        
+        #ENVIA CMD
+        if msg.startswith("/"):
+            comando = msg[1:]
+            send_comand = f"{tipo_A}{comando} ".encode()
+
+            if comando == "help":
+                print("""
+                Comandos disponibles:
+                /nick        -  Agregar/Cambiar tu nick.
+                /exit        -  Salir del chat.
+                /help        -  Mostrar esta ayuda.
+                """)
+                pretty_console()
+                continue
+
+            if comando == "exit":
+                comando = str(" exit").encode()
+                sock.sendall(send_comand + comando)
+                time.sleep(2)
+                sock.close()
+                break
+
+
+            if comando == "nick":
+                nuevo_nick = str(input("Ingrese su nuevo NICK: ")).encode()
+                if validar_nick(nuevo_nick):
+                    set_nick = send_comand + nuevo_nick
+                    print(set_nick)
+                    sock.sendall(set_nick)
+                    pretty_console()
+
+                else:
+                    print("Ingrese un nick con 3 carácteres como mínimo")
+                    pretty_console()
+        #Envia MSG
+        else:
+            mensaje = f"{tipo_B}{msg}".encode()
+            sock.sendall(mensaje)
+            pretty_console()
+    
+    #Cuando se ejecuta /exit
+    return False
+        
+
+#BUCLE PRINCIPAL
+while True:
+    socket_client = intentar_conexion('127.0.0.1', 5000)
+
+    ###Si no hay conexion exitosa rompe ciclo while
+    if socket_client is None:
+        print("No fue posible conectar con el servidor intente mas tarde")
+        break
+    
+    ###CONECTA E INTENTA ENVIAR
+    print("Conectado al servidor!")    
+    threading.Thread(target=escuchar, args=(socket_client,),daemon=True).start()
+    
+    ###SI EL SERVER ESTA ABAJO AL ENVIAR REINTENTA
+    try:
+        e =enviar(socket_client)
+        if e is False:
+            break
+
+    except Exception as e:
+        print(f"Error en el cliente {e}\n")
+    
+    
+    print(f"Desconectado del servidor. Intentando reconectar...\n")
